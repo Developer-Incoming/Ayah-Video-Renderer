@@ -10,7 +10,7 @@ recitersFolder = "Reciters"
 verseImagesFolder = "Verse Images"
 outputPath = "Output"
 disableTerminalColors = False
-enumeratingOutputs = False ## enumerating the videos or just replacing the existing file with a new one.
+enumeratingOutputs = True ## enumerating the videos or just replacing the existing file with a new one.
 
 
 ## colors for aesthetics
@@ -42,9 +42,8 @@ def validateInput(inp: str, validator: str.isdigit = str.isdigit, default: str =
 ## Starting, ending, or even containing X: str
 def filesXingWith(xingWith: str, conditionFunc = str.startswith, dirPath = outputPath) -> int:
     amount = 0
-    print("hyseyse@")
+    
     for file in os.listdir(dirPath):
-        print(file)
         if conditionFunc(file, xingWith):
             amount += 1
     
@@ -139,27 +138,32 @@ print(f'''{colors.end}
 ## Fetched files
 verseFiles = fetchFiles(reciterFolder, chapterIndex, selectedVerses, True, True)
 verseAudioFiles, verseImgFiles = verseFiles
-print(verseFiles)
+# print(verseFiles)
 
 # Video creation
 ### VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
-### TODO!!! Fix audio not aligned with image clips //////////////////////////////////////////
 verse_clips = []
 clipEnd = 0 # for appending clips' ending times
+largestImageDimensions = (0, 0) # x, y
 i = 0
 for verseRecitationPath in verseAudioFiles:
     verseImagePath = verseImgFiles[i]
     # print(f"{verseRecitationPath}{verseImagePath}")
     
     try:
+        ## Clips creation
         audio_clip = editor.AudioFileClip(verseRecitationPath)
         image_clip = editor.ImageClip(verseImagePath)
 
         clipDuration = audio_clip.duration
 
-        audio_clip.set_start(clipEnd)
-        image_clip = image_clip.set_start(clipEnd).set_audio(audioclip=audio_clip)
-        image_clip = image_clip.set_duration(clipDuration)
+        audio_clip = audio_clip.set_start(clipEnd)
+
+        image_clip = image_clip.set_start(clipEnd
+        ).set_duration(clipDuration
+        ).set_audio(audioclip=audio_clip
+        ).set_position("right", "top")
+
         verse_clips.insert(i, image_clip)
 
         clipEnd += clipDuration
@@ -170,10 +174,11 @@ for verseRecitationPath in verseAudioFiles:
 
     i += 1
 
+
 print(len(verse_clips))
 print(verse_clips)
 
-fileTag = "" if not enumeratingOutputs else f"{filesXingWith('output'):03}"
+fileTag = "" if not enumeratingOutputs else f"{filesXingWith('output'):03}" ## output file naming
 
-finalClip = editor.CompositeVideoClip(verse_clips)
-finalClip.write_videofile(f"{outputPath}\\output{fileTag}.mp4", fps=24)
+finalClip = editor.CompositeVideoClip(verse_clips, size=largestImageDimensions)
+finalClip.write_videofile(f"{outputPath}\\output{fileTag}.mp4", fps=24,)
