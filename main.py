@@ -129,7 +129,7 @@ reciterFolder = selectReciter()
 selectedChapter, chapterIndex = selectChapter()
 selectedVerses = selectVerses(chapterIndex)
 
-print(f'''
+print(f'''{colors.end}
 {type(reciterFolder)} - {reciterFolder}
 {type(selectedChapter)} - {selectedChapter}
 {type(chapterIndex)} - {chapterIndex}
@@ -143,24 +143,30 @@ print(verseFiles)
 
 # Video creation
 ### VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
+### TODO!!! Fix audio not aligned with image clips //////////////////////////////////////////
 verse_clips = []
 clipEnd = 0 # for appending clips' ending times
 i = 0
 for verseRecitationPath in verseAudioFiles:
     verseImagePath = verseImgFiles[i]
-    print(f"\n{verseRecitationPath}\n{verseImagePath}\n")
+    # print(f"{verseRecitationPath}{verseImagePath}")
+    
+    try:
+        audio_clip = editor.AudioFileClip(verseRecitationPath)
+        image_clip = editor.ImageClip(verseImagePath)
 
-    audio_clip = editor.AudioFileClip(verseRecitationPath)
-    image_clip = editor.ImageClip(verseImagePath)
+        clipDuration = audio_clip.duration
 
-    clipDuration = audio_clip.duration
+        audio_clip.set_start(clipEnd)
+        image_clip = image_clip.set_start(clipEnd).set_audio(audioclip=audio_clip)
+        image_clip = image_clip.set_duration(clipDuration)
+        verse_clips.insert(i, image_clip)
 
-    audio_clip.set_start(clipEnd)
-    image_clip = image_clip.set_start(clipEnd).set_audio(audioclip=audio_clip)
-    image_clip = image_clip.set_duration(clipDuration)
-    verse_clips.insert(i, image_clip)
+        clipEnd += clipDuration
 
-    clipEnd += clipDuration
+        print(clipEnd)
+    except OSError as err: ## handling file not found and such problems properly
+        print(f"{colors.red}Skipped verse {i + 1} because:{colors.end}\n{err}")
 
     i += 1
 
