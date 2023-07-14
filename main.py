@@ -33,7 +33,7 @@ with open(f"{basePath}\\Chapter Names.dat", mode="r") as chapterNamesFile:
     chaptersData = chapterNamesFile.read().splitlines()
 
 
-#-- Functions
+# Functions
 
 ## A simple function to validate user input by using a validator such as str.isdigit for instance, and use default input (0) when needed
 def validateInput(inp: str, validator: str.isdigit = str.isdigit, default: str = "1") -> str:
@@ -95,13 +95,16 @@ def selectVerses(chapterIndex: int) -> range:
     print(f"{colors.black}Length {colors.end}_{colors.black} Chapter{colors.end}")
     print(f"( {colors.green}{length}{colors.end} )  - {colors.blue}{chapter}{colors.end}\n")
 
-    rawSelection = str( validateInput(input(f"Select verses {colors.black}(start end){colors.end}:{colors.yellow} "), str.isdigit) ).split(" ")[0:]
+    rawSelection = str( input(f"Select verses {colors.black}(start end){colors.end}:{colors.yellow} ") ).split(" ")[0:]
+    print(rawSelection)
     if len(rawSelection) > 1:
         startVerse, endVerse = rawSelection
+
         if startVerse > endVerse:
             temp = startVerse
             startVerse = endVerse
             endVerse = temp
+        
         return range(int(startVerse), int(endVerse) + 1)
     else:
         endVerse = rawSelection[0]
@@ -144,14 +147,14 @@ verseAudioFiles, verseImgFiles = verseFiles
 ### VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
 verse_clips = []
 clipEnd = 0 # for appending clips' ending times
-largestImageDimensions = (0, 0) # x, y
+largestImageDimensions = (0, 0) # x, y -- for the output's resolution to fit the request
 i = 0
 for verseRecitationPath in verseAudioFiles:
     verseImagePath = verseImgFiles[i]
     # print(f"{verseRecitationPath}{verseImagePath}")
     
     try:
-        ## Clips creation
+        ## Clips creation process
         audio_clip = editor.AudioFileClip(verseRecitationPath)
         image_clip = editor.ImageClip(verseImagePath)
 
@@ -163,6 +166,12 @@ for verseRecitationPath in verseAudioFiles:
         ).set_duration(clipDuration
         ).set_audio(audioclip=audio_clip
         ).set_position("right", "top")
+
+        largestImageDimensions = (
+            image_clip.size[0] if image_clip.size[0] > largestImageDimensions[0] else largestImageDimensions[0],
+            image_clip.size[1] if image_clip.size[1] > largestImageDimensions[1] else largestImageDimensions[1]
+        )
+
 
         verse_clips.insert(i, image_clip)
 
