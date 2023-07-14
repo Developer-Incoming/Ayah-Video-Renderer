@@ -1,17 +1,20 @@
 import os
+# import argparse TODO use this instead of manually complicating everything.
 
 ## External Libraries
 from moviepy import editor # Used for video rendering, what did you expect?
 
-# The amount of of number signs indicates comment's *unimportance*, just like markdown
+# The amount of of number signs indicates comment's *unimportance*, just like markdown,
+# but also means something has been commented to prevent its execution, most likely dev prints.
 
 # Settings
 recitersFolder = "Reciters"
 verseImagesFolder = "Verse Images"
 outputPath = "Output"
 disableTerminalColors = False
+minimumResolution = (1500, 500) # minimum, will be overwritten if any image is wider or longer.
 enumeratingOutputs = True ## enumerating the videos or just replacing the existing file with a new one.
-
+writeOutput = True
 
 ## colors for aesthetics
 class colors:
@@ -96,8 +99,9 @@ def selectVerses(chapterIndex: int) -> range:
     print(f"( {colors.green}{length}{colors.end} )  - {colors.blue}{chapter}{colors.end}\n")
 
     rawSelection = str( input(f"Select verses {colors.black}(start end){colors.end}:{colors.yellow} ") ).split(" ")[0:]
-    print(rawSelection)
-    if len(rawSelection) > 1:
+    if len(rawSelection) < 1:
+        rawSelection = ["1"]
+    elif len(rawSelection) > 1:
         startVerse, endVerse = rawSelection
 
         if startVerse > endVerse:
@@ -131,12 +135,12 @@ reciterFolder = selectReciter()
 selectedChapter, chapterIndex = selectChapter()
 selectedVerses = selectVerses(chapterIndex)
 
-print(f'''{colors.end}
-{type(reciterFolder)} - {reciterFolder}
-{type(selectedChapter)} - {selectedChapter}
-{type(chapterIndex)} - {chapterIndex}
-{type(selectedVerses)} - {selectedVerses}
-''')
+# print(f'''{colors.end}
+# {type(reciterFolder)} - {reciterFolder}
+# {type(selectedChapter)} - {selectedChapter}
+# {type(chapterIndex)} - {chapterIndex}
+# {type(selectedVerses)} - {selectedVerses}
+# ''')
 
 ## Fetched files
 verseFiles = fetchFiles(reciterFolder, chapterIndex, selectedVerses, True, True)
@@ -146,9 +150,14 @@ verseAudioFiles, verseImgFiles = verseFiles
 # Video creation
 ### VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
 verse_clips = []
-clipEnd = 0 # for appending clips' ending times
-largestImageDimensions = (0, 0) # x, y -- for the output's resolution to fit the request
+nextClipEndTime = 0 # for appending clips' ending times
+largestImageDimensions = minimumResolution #(0, 0) # x, y -- for the output's resolution to fit the request
 i = 0
+
+## empty clip for later use
+image_clip = None
+verse_clips.append(image_clip)
+
 for verseRecitationPath in verseAudioFiles:
     verseImagePath = verseImgFiles[i]
     # print(f"{verseRecitationPath}{verseImagePath}")
@@ -156,13 +165,13 @@ for verseRecitationPath in verseAudioFiles:
     try:
         ## Clips creation process
         audio_clip = editor.AudioFileClip(verseRecitationPath)
-        image_clip = editor.ImageClip(verseImagePath)
+        image_clip = editor.ImageClip(verseImagePath, ismask=True)
 
         clipDuration = audio_clip.duration
 
-        audio_clip = audio_clip.set_start(clipEnd)
+        audio_clip = audio_clip.set_start(nextClipEndTime)
 
-        image_clip = image_clip.set_start(clipEnd
+        image_clip = image_clip.set_start(nextClipEndTime
         ).set_duration(clipDuration
         ).set_audio(audioclip=audio_clip
         ).set_position("right", "top")
@@ -173,21 +182,29 @@ for verseRecitationPath in verseAudioFiles:
         )
 
 
-        verse_clips.insert(i, image_clip)
+        verse_clips.append(image_clip)
 
-        clipEnd += clipDuration
+        nextClipEndTime += clipDuration
 
-        print(clipEnd)
-    except OSError as err: ## handling file not found and such problems properly
+        # print(nextClipEndTime)
+    except OSError as err: ## handling file not found and such issues properly
         print(f"{colors.red}Skipped verse {i + 1} because:{colors.end}\n{err}")
 
     i += 1
 
+verse_clips[0] = editor.ColorClip(largestImageDimensions, color=(255, 255, 255)
+).set_duration = nextClipEndTime
 
-print(len(verse_clips))
-print(verse_clips)
+# print(len(verse_clips)) 
+# print(verse_clips)
 
 fileTag = "" if not enumeratingOutputs else f"{filesXingWith('output'):03}" ## output file naming
 
+print(largestImageDimensions)
 finalClip = editor.CompositeVideoClip(verse_clips, size=largestImageDimensions)
-finalClip.write_videofile(f"{outputPath}\\output{fileTag}.mp4", fps=24,)
+
+if writeOutput:
+    print(largestImageDimensions)
+    finalClip.write_videofile(f"{outputPath}\\output{fileTag}.mp4", fps=24)
+else:
+    pass # TODO play video without writing to disk.
