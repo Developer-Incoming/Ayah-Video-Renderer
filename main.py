@@ -8,20 +8,22 @@ from moviepy import editor # Used for video rendering, what did you expect?
 # Settings
 recitersFolder = "Reciters"
 verseImagesFolder = "Verse Images"
-disableColors = False
+outputPath = "Output"
+disableTerminalColors = False
+enumeratingOutputs = False ## enumerating the videos or just replacing the existing file with a new one.
 
 
 ## colors for aesthetics
 class colors:
-    end = "\033[0m" if not disableColors else ""
-    black = "\033[90m" if not disableColors else ""
-    red = "\033[91m" if not disableColors else ""
-    green = "\033[92m" if not disableColors else ""
-    yellow = "\033[93m" if not disableColors else ""
-    blue = "\033[94m" if not disableColors else ""
-    magenta = "\033[95m" if not disableColors else ""
-    cyan = "\033[96m" if not disableColors else ""
-    white = "\033[97m" if not disableColors else ""
+    end = "\033[0m" if not disableTerminalColors else ""
+    black = "\033[90m" if not disableTerminalColors else ""
+    red = "\033[91m" if not disableTerminalColors else ""
+    green = "\033[92m" if not disableTerminalColors else ""
+    yellow = "\033[93m" if not disableTerminalColors else ""
+    blue = "\033[94m" if not disableTerminalColors else ""
+    magenta = "\033[95m" if not disableTerminalColors else ""
+    cyan = "\033[96m" if not disableTerminalColors else ""
+    white = "\033[97m" if not disableTerminalColors else ""
 
 
 ## Setup chapters data
@@ -36,6 +38,17 @@ with open(f"{basePath}\\Chapter Names.dat", mode="r") as chapterNamesFile:
 ## A simple function to validate user input by using a validator such as str.isdigit for instance, and use default input (0) when needed
 def validateInput(inp: str, validator: str.isdigit = str.isdigit, default: str = "1") -> str:
     return inp if validator(inp) else default
+
+## Starting, ending, or even containing X: str
+def filesXingWith(xingWith: str, conditionFunc = str.startswith, dirPath = outputPath) -> int:
+    amount = 0
+    print("hyseyse@")
+    for file in os.listdir(dirPath):
+        print(file)
+        if conditionFunc(file, xingWith):
+            amount += 1
+    
+    return amount
 
 ## Prompts the user to select the reciter
 def selectReciter() -> str:
@@ -131,17 +144,30 @@ print(verseFiles)
 # Video creation
 ### VideoFileClip, AudioFileClip, CompositeVideoClip, CompositeAudioClip
 verse_clips = []
-
+clipEnd = 0 # for appending clips' ending times
 i = 0
 for verseRecitationPath in verseAudioFiles:
     verseImagePath = verseImgFiles[i]
     print(f"\n{verseRecitationPath}\n{verseImagePath}\n")
 
-    audio_clip = editor.AudioClip(verseRecitationPath)
+    audio_clip = editor.AudioFileClip(verseRecitationPath)
     image_clip = editor.ImageClip(verseImagePath)
-    verse_clips.append(image_clip.set_duration(audio_clip.duration))
+
+    clipDuration = audio_clip.duration
+
+    audio_clip.set_start(clipEnd)
+    image_clip = image_clip.set_start(clipEnd).set_audio(audioclip=audio_clip)
+    image_clip = image_clip.set_duration(clipDuration)
+    verse_clips.insert(i, image_clip)
+
+    clipEnd += clipDuration
 
     i += 1
 
+print(len(verse_clips))
+print(verse_clips)
+
+fileTag = "" if not enumeratingOutputs else f"{filesXingWith('output'):03}"
+
 finalClip = editor.CompositeVideoClip(verse_clips)
-finalClip.write_videofile("output.mp4")
+finalClip.write_videofile(f"{outputPath}\\output{fileTag}.mp4", fps=24)
