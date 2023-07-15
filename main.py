@@ -166,7 +166,7 @@ for verseRecitationPath in verseAudioFiles:
     try:
         ## Clips creation process
         audio_clip = editor.AudioFileClip(verseRecitationPath)
-        image_clip = editor.ImageClip(verseImagePath, ismask=False)
+        image_clip = editor.ImageClip(verseImagePath, ismask=True)
 
         clipDuration = audio_clip.duration
 
@@ -201,7 +201,8 @@ verse_clips[0] = editor.ColorClip(largestImageDimensions, color=backgroundColor,
 fileTag = "" if not enumeratingOutputs else f"{filesXingWith('output'):03}" ## output file naming
 
 print(largestImageDimensions)
-finalClip = editor.CompositeVideoClip(verse_clips, size=largestImageDimensions, ismask=False, bg_color=backgroundColor)
+
+finalClip = editor.CompositeVideoClip(verse_clips, size=largestImageDimensions, bg_color=backgroundColor)
 
 if writeOutput:
     print(largestImageDimensions)
