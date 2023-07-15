@@ -13,20 +13,21 @@ verseImagesFolder = "Verse Images"
 outputPath = "Output"
 disableTerminalColors = False
 minimumResolution = (1500, 500) # minimum, will be overwritten if any image is wider or longer.
+backgroundColor = (235, 235, 235)
 enumeratingOutputs = True ## enumerating the videos or just replacing the existing file with a new one.
 writeOutput = True
 
 ## colors for aesthetics
-class colors:
-    end = "\033[0m" if not disableTerminalColors else ""
-    black = "\033[90m" if not disableTerminalColors else ""
-    red = "\033[91m" if not disableTerminalColors else ""
-    green = "\033[92m" if not disableTerminalColors else ""
-    yellow = "\033[93m" if not disableTerminalColors else ""
-    blue = "\033[94m" if not disableTerminalColors else ""
+class colors: ## sorry
+    end = "\033[0m"      if not disableTerminalColors else ""
+    black = "\033[90m"   if not disableTerminalColors else ""
+    red = "\033[91m"     if not disableTerminalColors else ""
+    green = "\033[92m"   if not disableTerminalColors else ""
+    yellow = "\033[93m"  if not disableTerminalColors else ""
+    blue = "\033[94m"    if not disableTerminalColors else ""
     magenta = "\033[95m" if not disableTerminalColors else ""
-    cyan = "\033[96m" if not disableTerminalColors else ""
-    white = "\033[97m" if not disableTerminalColors else ""
+    cyan = "\033[96m"    if not disableTerminalColors else ""
+    white = "\033[97m"   if not disableTerminalColors else ""
 
 
 ## Setup chapters data
@@ -165,7 +166,7 @@ for verseRecitationPath in verseAudioFiles:
     try:
         ## Clips creation process
         audio_clip = editor.AudioFileClip(verseRecitationPath)
-        image_clip = editor.ImageClip(verseImagePath, ismask=True)
+        image_clip = editor.ImageClip(verseImagePath, ismask=False)
 
         clipDuration = audio_clip.duration
 
@@ -174,7 +175,7 @@ for verseRecitationPath in verseAudioFiles:
         image_clip = image_clip.set_start(nextClipEndTime
         ).set_duration(clipDuration
         ).set_audio(audioclip=audio_clip
-        ).set_position("right", "top")
+        ).set_position(("center", "top"))
 
         largestImageDimensions = (
             image_clip.size[0] if image_clip.size[0] > largestImageDimensions[0] else largestImageDimensions[0],
@@ -192,8 +193,7 @@ for verseRecitationPath in verseAudioFiles:
 
     i += 1
 
-verse_clips[0] = editor.ColorClip(largestImageDimensions, color=(255, 255, 255)
-).set_duration = nextClipEndTime
+verse_clips[0] = editor.ColorClip(largestImageDimensions, color=backgroundColor, duration=nextClipEndTime, ismask=False)
 
 # print(len(verse_clips)) 
 # print(verse_clips)
@@ -201,7 +201,7 @@ verse_clips[0] = editor.ColorClip(largestImageDimensions, color=(255, 255, 255)
 fileTag = "" if not enumeratingOutputs else f"{filesXingWith('output'):03}" ## output file naming
 
 print(largestImageDimensions)
-finalClip = editor.CompositeVideoClip(verse_clips, size=largestImageDimensions)
+finalClip = editor.CompositeVideoClip(verse_clips, size=largestImageDimensions, ismask=False, bg_color=backgroundColor)
 
 if writeOutput:
     print(largestImageDimensions)
