@@ -1,6 +1,2 @@
-# Do I really have to specify os and argparse as a requirement, I believe they're an internal libraries,
-# that doesn't require installation.
-
-os
 argparse
 moviepy

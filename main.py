@@ -129,7 +129,7 @@ print(largestImageDimensions)
 # videoClip1 = editor.ImageSequenceClip(clips_group1, fps=24, ismask=True)
 
 video_clip = editor.CompositeVideoClip(image_clips, size=largestImageDimensions).set_audio(editor.CompositeAudioClip(audio_clips))
-
+editor.
 # finalClip = editor.CompositeVideoClip(clips=image_clips, ismask=False, bg_color=settings["backgroundColor"])
 
 if settings["writeOutput"]:
