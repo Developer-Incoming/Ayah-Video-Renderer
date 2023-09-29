@@ -7,12 +7,12 @@ try:
 except ImportError as exec:
     global Fore
     class Fore:
-        BLACK  = ""
-        RED    = ""
-        GREEN  = ""
-        YELLOW = ""
-        BLUE   = ""
-        RESET  = ""
+        LIGHTBLACK_EX = ""
+        RED           = ""
+        GREEN         = ""
+        YELLOW        = ""
+        CYAN          = ""
+        RESET         = ""
     
     print(exec)
 
@@ -55,16 +55,16 @@ def selectReciter(preselect: int = -1) -> str:
         if os.path.isdir(f"{magicPath}\\{filename}"):
             dirs.append(f"{magicPath}\\{filename}")
             i += 1
-            output += f"[ {Fore.GREEN}{i}{Fore.RESET} ] - {Fore.BLUE}{filename}{Fore.RESET}\n"
+            output += f"[ {Fore.GREEN}{i}{Fore.RESET} ] - {Fore.CYAN}{filename}{Fore.RESET}\n"
     
     if preselect != -1:
-        print(f"{Fore.BLACK}Index {Fore.RESET}_{Fore.BLACK} Reciter{Fore.RESET}")
+        print(f"{Fore.LIGHTBLACK_EX}Index {Fore.RESET}_{Fore.LIGHTBLACK_EX} Reciter{Fore.RESET}")
         print(output)
 
     return dirs[ preselect if preselect != -1 else int( validateInput(input(f"Select a reciter:{Fore.YELLOW} "), str.isdigit) ) - 1 ]
 
-## Prompts the user to select the chapter
-def selectChapter(preselect: int = -1) -> list:
+### Prints the chapters
+def printChapters() -> None:
     i = 0
     output = []
     
@@ -73,39 +73,43 @@ def selectChapter(preselect: int = -1) -> list:
     for chapterData in chaptersData:
         chapter, length = chaptersData[i].split(",")
         i += 1
-        output.append(f"[ {Fore.GREEN}{i}{Fore.RESET} ] - {Fore.BLUE}{chapter}{Fore.RESET}")
+        output.append(f"[ {Fore.GREEN}{' ' if i < 100 else ''}{i}{' ' if i < 10 else ''}{Fore.RESET} ] - {Fore.CYAN}{chapter}{Fore.RESET}")
         if longestChapterLength > len(chapter):
             longestChapterLength = len(chapter)
     
-    if preselect != -1:
-        print(f"{Fore.BLACK}Index {Fore.RESET}_{Fore.BLACK} Chapter{Fore.RESET}")
+    print(f"{Fore.LIGHTBLACK_EX} Index {Fore.RESET} _{Fore.LIGHTBLACK_EX}  Chapter{Fore.RESET}")
 
-        ## Better chapters print, ty spickeycactus [198167646510776320]
-        used = []
-        for string in output:
-            if string in used:
+    ## Better chapters print, ty spickeycactus [198167646510776320]
+    used = []
+    for string in output:
+        if string in used:
+            continue
+        elif len(string) > 25:
+            print(string)
+            used.append(string)
+            continue
+        
+        for short_string in output:
+            if short_string in used:
                 continue
-            elif len(string) > 10:
-                print(string)
+
+            if len(short_string) < 35:
+                print(string, short_string)
+
                 used.append(string)
-                continue
-            
-            for short_string in output:
-                if short_string in used:
-                    continue
+                used.append(short_string)
 
-                if len(short_string) < 5:
-                    print(string, short_string)
+                break
+        else:
+            print(string)
 
-                    used.append(string)
-                    used.append(short_string)
-
-                    break
-            else:
-                print(string)
-
-        # for chapterData in output:
-        #     print(chapterData)
+## Prompts the user to select the chapter
+def selectChapter(preselect: int = -1) -> list:
+    if preselect != -1:
+        printChapters()
+    
+    # for chapterData in output:
+    #     print(chapterData)
     
     chapterIndex = preselect if preselect != -1 else int( validateInput(input(f"Select chapter:{Fore.YELLOW} "), str.isdigit) ) - 1
     return [chaptersData[chapterIndex], chapterIndex]
@@ -115,10 +119,10 @@ def selectVerses(chapterIndex: int, preselectStart: int = -1, preselectEnd: int 
     chapter, length = chaptersData[chapterIndex].split(",")
 
     if preselect != -1:
-        print(f"{Fore.BLACK}Length {Fore.RESET}_{Fore.BLACK} Chapter{Fore.RESET}")
-        print(f"( {Fore.GREEN}{length}{Fore.RESET} )  - {Fore.BLUE}{chapter}{Fore.RESET}\n")
+        print(f"{Fore.LIGHTBLACK_EX}Length {Fore.RESET}_{Fore.LIGHTBLACK_EX} Chapter{Fore.RESET}")
+        print(f"( {Fore.GREEN}{length}{Fore.RESET} )  - {Fore.CYAN}{chapter}{Fore.RESET}\n")
     
-    rawSelection = [preselectStart, preselectEnd] if preselectStart != -1 else (str( input(f"Select verses {Fore.BLACK}(start end){Fore.RESET}:{Fore.YELLOW} ") ).split(" ")[0:])
+    rawSelection = [preselectStart, preselectEnd] if preselectStart != -1 else (str( input(f"Select verses {Fore.LIGHTBLACK_EX}(start end){Fore.RESET}:{Fore.YELLOW} ") ).split(" ")[0:])
     if len(rawSelection) < 1:
         rawSelection = ["1"]
     elif len(rawSelection) > 1:
