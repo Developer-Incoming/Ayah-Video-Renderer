@@ -61,7 +61,7 @@ def selectReciter(preselect: int = -1) -> str:
         print(f"{Fore.LIGHTBLACK_EX}Index {Fore.RESET}_{Fore.LIGHTBLACK_EX} Reciter{Fore.RESET}")
         print(output)
 
-    return dirs[ preselect if preselect != -1 else int( validateInput(input(f"Select a reciter:{Fore.YELLOW} "), str.isdigit) ) - 1 ]
+    return dirs[ preselect if preselect == -1 else int( validateInput(input(f"Select a reciter:{Fore.YELLOW} "), str.isdigit) ) - 1 ]
 
 ### Prints the chapters
 def printChapters() -> None:
@@ -84,7 +84,7 @@ def printChapters() -> None:
     for string in output:
         if string in used:
             continue
-        elif len(string) > 25:
+        elif len(string) > 10:
             print(string)
             used.append(string)
             continue
@@ -93,7 +93,7 @@ def printChapters() -> None:
             if short_string in used:
                 continue
 
-            if len(short_string) < 35:
+            if len(short_string) < 5:
                 print(string, short_string)
 
                 used.append(string)
@@ -105,24 +105,28 @@ def printChapters() -> None:
 
 ## Prompts the user to select the chapter
 def selectChapter(preselect: int = -1) -> list:
-    if preselect != -1:
+    if preselect == -1:
         printChapters()
     
     # for chapterData in output:
     #     print(chapterData)
     
-    chapterIndex = preselect if preselect != -1 else int( validateInput(input(f"Select chapter:{Fore.YELLOW} "), str.isdigit) ) - 1
+    chapterIndex = preselect if preselect == -1 else int( validateInput(input(f"Select chapter:{Fore.YELLOW} "), str.isdigit) ) - 1
     return [chaptersData[chapterIndex], chapterIndex]
+
+### Prints the length of a chapter in verses
+def printVersesOf(chapterIndex: int) -> None:
+    chapter, length = chaptersData[chapterIndex].split(",")
+    
+    print(f"{Fore.LIGHTBLACK_EX}Length {Fore.RESET}_{Fore.LIGHTBLACK_EX} Chapter{Fore.RESET}")
+    print(f"( {Fore.GREEN}{length}{Fore.RESET} )  - {Fore.CYAN}{chapter}{Fore.RESET}\n")
 
 ## Prompts the user to select the verses
 def selectVerses(chapterIndex: int, preselectStart: int = -1, preselectEnd: int = -1) -> range:
-    chapter, length = chaptersData[chapterIndex].split(",")
-
-    if preselect != -1:
-        print(f"{Fore.LIGHTBLACK_EX}Length {Fore.RESET}_{Fore.LIGHTBLACK_EX} Chapter{Fore.RESET}")
-        print(f"( {Fore.GREEN}{length}{Fore.RESET} )  - {Fore.CYAN}{chapter}{Fore.RESET}\n")
+    if preselectStart == -1:
+        printVersesOf(chapterIndex=chapterIndex)
     
-    rawSelection = [preselectStart, preselectEnd] if preselectStart != -1 else (str( input(f"Select verses {Fore.LIGHTBLACK_EX}(start end){Fore.RESET}:{Fore.YELLOW} ") ).split(" ")[0:])
+    rawSelection = [preselectStart, preselectEnd] if preselectStart == -1 else (str( input(f"Select verses {Fore.LIGHTBLACK_EX}(start end){Fore.RESET}:{Fore.YELLOW} ") ).split(" ")[0:])
     if len(rawSelection) < 1:
         rawSelection = ["1"]
     elif len(rawSelection) > 1:

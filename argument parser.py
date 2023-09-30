@@ -24,29 +24,33 @@ parser = argparse.ArgumentParser(
 subParser = parser.add_subparsers()
 
 renderParser = subParser.add_parser("render")
-renderParser.add_argument("filename"),
-renderParser.add_argument("-c", "--chapter", type=int, required=True, help="The index of the chapter, "),
-renderParser.add_argument("-s", "--start-verse", type=int),
-renderParser.add_argument("-e", "--end-verse", type=int),
-renderParser.add_argument("-r", "--reciter", type=int, default=1),
-renderParser.add_argument("--reciters-folder", type=str, default="Reciters", required=True),
-renderParser.add_argument("--verses-images-folder", type=str, default="Verses Images", required=True),
-renderParser.add_argument("--getVerseAudio", type=bool, default=True),
-renderParser.add_argument("--getVerseImages", type=bool, default=True),
-renderParser.add_argument("--colors", type=bool, default=True)
+renderParser.add_argument("filename")
+renderParser.add_argument("-c", "--chapter",        type=int, required=True, help="The index of the chapter")
+renderParser.add_argument("-s", "--start-verse",    type=int,   default=0)
+renderParser.add_argument("-e", "--end-verse",      type=int,   default=-1)
+renderParser.add_argument("-r", "--reciter",        type=int,   default=1)
+renderParser.add_argument("--reciters-folder",      type=str,   default="Reciters")
+renderParser.add_argument("--verses-images-folder", type=str,   default="Verses Images")
+renderParser.add_argument("--getVerseAudio",        type=bool,  default=True)
+renderParser.add_argument("--getVerseImages",       type=bool,  default=True)
+renderParser.add_argument("--colors",               type=bool,  default=True)
 
 renderParser = subParser.add_parser("list")
-renderParser.add_argument('list', default='all', const='all', nargs='?', choices=['all', 'servers', 'storage'])
+renderParser.add_argument("-c", "--chapter", type=int)
 # subParser.add_argument("-c", "--chapters")
 # subParser.add_argument("-v", "--verses")
 
 if __name__ == "__main__":
     args = parser.parse_args()
-    if "list" in vars(args):
-        qvsel.printChapters()
+    print(vars(args))
+
+    if not "filename" in vars(args):
+        if args.chapter == None:
+            qvsel.printChapters()
+        else:
+            qvsel.printVersesOf(chapterIndex=int(args.chapter) - 1)
     else:
-        print(*{x for x in args._get_kwargs()})
-        print(args.reciters_folder)
+        print("setup")
         input()
         qvsel.setup(
             reciterFolder=args.reciters_folder,
@@ -54,9 +58,9 @@ if __name__ == "__main__":
             terminalColors=args.colors
         )
         
-        reciterFolder = qvsel.selectReciter(preselect=args.reciter)
-        selectedChapter, chapterIndex = qvsel.selectChapter(preselect=args.chapter)
-        selectedVerses = qvsel.selectVerses(chapterIndex, preselectStart=args.start_verse, preselectEnd=args.end_verse)
+        reciterFolder = qvsel.selectReciter(preselect=int(args.reciter))
+        selectedChapter, chapterIndex = qvsel.selectChapter(preselect=int(args.chapter))
+        selectedVerses = qvsel.selectVerses(chapterIndex, preselectStart=int(args.start_verse), preselectEnd=int(args.end_verse))
 
         print(f'''{qvsel.colors.end}
         {type(reciterFolder)} - {reciterFolder}
@@ -77,5 +81,3 @@ if __name__ == "__main__":
         )
         verseAudioFiles, verseImgFiles = verseFiles
         print(verseFiles)
-    input("\n\n oki doki?")
-    print("yes")
