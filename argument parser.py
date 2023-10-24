@@ -25,7 +25,7 @@ subParser = parser.add_subparsers()
 
 renderParser = subParser.add_parser("render")
 renderParser.add_argument("filename")
-renderParser.add_argument("-c", "--chapter",        type=int, required=True, help="The index of the chapter")
+renderParser.add_argument("-c", "--chapter",        type=int,   required=True, help="The index of the chapter")
 renderParser.add_argument("-s", "--start-verse",    type=int,   default=0)
 renderParser.add_argument("-e", "--end-verse",      type=int,   default=-1)
 renderParser.add_argument("-r", "--reciter",        type=int,   default=1)
